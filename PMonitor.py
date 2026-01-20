@@ -4,6 +4,11 @@ import time
 from curl_cffi import requests
 import difflib
 
+
+def get_user_timezone():
+    pass
+
+
 st.set_page_config(page_title="Pulsara Monitor", layout="wide")
 
 COLOR_MAP = {
@@ -144,12 +149,35 @@ else:
                 })
 
             if processed_lots:
-                st.markdown(
-                    f"<div style='font-family: sans-serif; font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff;'>"
-                    f"📦 {final_name.upper()} <span style='color: #444; margin: 0 10px;'>|</span> "
-                    f"<span style='color: #FFD700;'>{time.strftime('%H:%M:%S')}</span>"
-                    f"</div>",
-                    unsafe_allow_html=True
+                update_ts = time.time() * 1000
+
+                st.components.v1.html(
+                    f"""
+                    <div style="display: flex; align-items: center; font-family: sans-serif; background-color: #0e1117; color: white; padding: 10px;">
+                        <div style="font-size: 20px; font-weight: bold; text-transform: uppercase;">
+                            📦 {final_name}
+                        </div>
+                        <div style="margin: 0 15px; color: #444; font-size: 20px;">|</div>
+                        <div id="update-time" style="font-size: 20px; font-weight: bold; color: #FFD700; font-family: monospace;">
+                            --:--:--
+                        </div>
+                    </div>
+
+                    <script>
+                        function formatTime() {{
+                            const serverTime = new Date({update_ts});
+                            const localTime = serverTime.toLocaleTimeString('ru-RU', {{ 
+                                hour: '2-digit', 
+                                minute: '2-digit', 
+                                second: '2-digit' 
+                            }});
+                            
+                            document.getElementById('update-time').innerText = localTime;
+                        }}
+                        formatTime();
+                    </script>
+                    """,
+                    height=60,
                 )
 
                 sorted_lots = sorted(
